@@ -1,0 +1,21 @@
+indicadores william
+monitorar angulo de grafico
+spread de medias
+adcionar stops e alvos
+comparar medias de indicadores para observar entradas e saidas
+MANTER BREAK EVEN
+
+pontos em minutos 5,15,30,60 ....
+
+operar NASDAQ e GOLD
+
+williams periodo 50 (padrao 14)
+
+medias 4 8 e 20 exponenciais
+
+MACD rap 4 devagar 12 suave 3 sem histograma
+
+# NASDAQ API
+https://github.com/Nasdaq/NasdaqCloudDataService-REST-API
+# python package
+https://pypi.org/project/Nasdaq-Data-Link/
