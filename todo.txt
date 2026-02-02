@@ -15,3 +15,9 @@ Add Active initialization via cli
 Add to main loop to check prices every 15m or other "T" based on yfinance options
 	make it configurable via cli -f --frequency
 		# yfinance doc : Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo Intraday data cannot extend last 60 days
+
+
+Future:
+	change to a server structure to handle multiple actives
+	active logging logic should be saved in a log/ directory for each active like "ACTIVE/DD_MM_YYYY.log" or a better log structure ??
+	decision log should have a similar structure for each active and a main decision log for easier auditing	
