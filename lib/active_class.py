@@ -16,7 +16,7 @@ load_dotenv(ENV_PATH)
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
-logger = logging.getLogger("StockEngine")
+logger = logging.getLogger("Active_Class")
 
 
 @dataclass
