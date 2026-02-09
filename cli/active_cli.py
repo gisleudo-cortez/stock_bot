@@ -10,13 +10,22 @@ def main() -> None:
     active_parser = subparsers.add_parser(
         name="active", help="Initialize a active for monitoring"
     )
-    active_parser.add_argument("active", help="active to be monitored")
+    active_parser.add_argument(
+        "check", help="Check if and active is Available for monitoring"
+    )
+
+    tracking_parser = subparsers.add_parser("track", help="Start tracking of an active")
+    # add a argument with time intervals to track (todo.txt)
 
     args = parser.parse_args()
     match args.command:
-        case "active":
+        case "check":
             active = Active(args.active)
             print()
+        case "track":
+            # start loop to monitoring
+            print("To be implemented")
+            NotImplementedError()
         case _:
             parser.print_help()
 

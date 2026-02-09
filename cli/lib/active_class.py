@@ -1,10 +1,10 @@
 import logging
 import math
+import csv
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List
-
 import polars as pl
 import yfinance as yf
 from dotenv import load_dotenv
@@ -12,6 +12,12 @@ from dotenv import load_dotenv
 ROOT_DIR = Path(__file__).resolve().parent.parent
 ENV_PATH = ROOT_DIR / ".env"
 load_dotenv(ENV_PATH)
+DATA_DIR = ROOT_DIR / "data"
+HISTORY_DIR = DATA_DIR / "history"
+LOGS_DIR = DATA_DIR / "logs"
+
+for d in [HISTORY_DIR, LOGS_DIR]:
+    d.mkdir(parents=True, exist_ok=True)
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
@@ -28,6 +34,7 @@ class Active:
     _price_buffer: List[Dict[str, Any]] = field(default_factory=list, repr=False)
     _created_at: datetime = field(default_factory=datetime.now, repr=False)
     _decision_log: List[Dict[str, Any]] = field(default_factory=list, repr=False)
+    _last_saved_index: int = 0
 
     def __post_init__(self) -> None:
         self.ticker = self.ticker.upper().strip()
@@ -47,7 +54,6 @@ class Active:
                 new_price = float(data["Close"].iloc[-1])
                 market_time = data.index[-1]
 
-                self.trend_angle = self._calculate_new_angle(new_price, window=5)
                 self.price = new_price
 
                 self._price_buffer.append(
@@ -56,13 +62,17 @@ class Active:
                         "current_price": self.price,
                         "market_time": market_time,
                         "updated_at": datetime.now(),
-                        "trend_angle": self.trend_angle,
+                        "trend_angle": 0.0,
                     }
                 )
+
+                self.trend_angle = self._calculate_normalized_angle(window=5)
+                self._price_buffer[-1]["trend_angle"] = self.trend_angle
 
                 logger.info(
                     f"Buffered {self.ticker} @ {self.price} [Angle: {self.trend_angle:.2f}°]"
                 )
+                self.save_state()
             else:
                 logger.warning(f"No data for {self.ticker}")
 
@@ -70,19 +80,25 @@ class Active:
             logger.error(f"Refresh failed: {e}")
             self.log_decision("FETCH_ERROR", {"error": str(e)})
 
-    def _calculate_new_angle(self, current_price: float, window: int) -> float:
-        if len(self._price_buffer) < (window - 1):
+    def _calculate_normalized_angle(self, window: int) -> float:
+        if len(self._price_buffer) < (window):
             return 0.0
 
-        recent_records = self._price_buffer[-(window - 1) :]
-        prices = [r["current_price"] for r in recent_records] + [current_price]
+        recent_records = self._price_buffer[-window:]
+        prices = [r["current_price"] for r in recent_records]
 
-        xs = list(range(len(prices)))
+        # normalize
+        base_price = prices[0]
+        if base_price == 0:
+            return 0.0
+
+        norm_prices = [(p / base_price) * 100 for p in prices]
+        xs = list(range(len(norm_prices)))
         n = len(xs)
 
         sum_x = sum(xs)
-        sum_y = sum(prices)
-        sum_xy = sum(x * y for x, y in zip(xs, prices))
+        sum_y = sum(norm_prices)
+        sum_xy = sum(x * y for x, y in zip(xs, norm_prices))
         sum_xx = sum(x * x for x in xs)
 
         denominator = (n * sum_xx) - (sum_x * sum_x)
@@ -91,7 +107,31 @@ class Active:
             return 0.0
 
         slope = ((n * sum_xy) - (sum_x * sum_y)) / denominator
+
         return math.degrees(math.atan(slope))
+
+    def save_state(self) -> None:
+        today_str = datetime.now().strftime("%Y-%m-%d")
+
+        csv_file = HISTORY_DIR / f"{self.ticker}_{today_str}.csv"
+        file_exists = csv_file.exists()
+        new_records = self._price_buffer[self._last_saved_index :]
+
+        if new_records:
+            keys = new_records[0].keys()
+            with open(csv_file, "a", newline="") as f:
+                dict_writer = csv.DictWriter(f, fieldnames=keys)
+                if not file_exists:
+                    dict_writer.writeheader()
+                dict_writer.writerows(new_records)
+            self._last_saved_index = len(self._price_buffer)
+
+        log_file = LOGS_DIR / f"active_{today_str}.log"
+        with open(log_file, "a") as f:
+            while self._decision_log:
+                entry = self._decision_log.pop(0)
+                log_line = f"[{entry['timestamp']}] {self.ticker} - {entry['action']}: {entry['metadata']}\n"
+                f.write(log_line)
 
     def to_polars(self) -> pl.DataFrame:
         if not self._price_buffer:
