@@ -1,23 +1,9 @@
-Implement cli functionality
-
-Add Active initialization via cli
-	required argument -i uses Ticker to instanciate an "Active" class e.g. "AAPL"
-		"Accept multiple at once??"
-	it should initiate a main loop to refresh and keep track of prices 
-	while Active: (Every decision should be logged into the decision log and saved to "disk")
-		update prices
-		calculate angle
-		calculate trend
-		calculate change from previous angle 
-		send notification when criteria is met 
-	
-
-Add to main loop to check prices every 15m or other "T" based on yfinance options
-	make it configurable via cli -f --frequency
-		# yfinance doc : Valid intervals: 1m,2m,5m,15m,30m,60m,90m,1h,1d,5d,1wk,1mo,3mo Intraday data cannot extend last 60 days
-
-
-Future:
-	change to a server structure to handle multiple actives
-	active logging logic should be saved in a log/ directory for each active like "ACTIVE/DD_MM_YYYY.log" or a better log structure ??
-	decision log should have a similar structure for each active and a main decision log for easier auditing	
+Next Steps:
+Implement Strategy Logic in `active_class.py` (_check_strategy_signals)
+	 Define Buy/Sell triggers based on EMA crossover + Williams threshold
+	 Define Trend Angle filter logic
+Implement Trade Management
+	 Add Stop Loss & Take Profit variables to Active class
+	 Implement "Break Even" logic (move SL to entry when target reached)
+Add Notification System (Print/Alert beyond logs)
+Add Unit Tests for Strategy Logic

@@ -1,0 +1,4 @@
+[2026-02-12T10:24:12.305950] AAPL - INITIALIZE: {'ticker': 'AAPL', 'timestamp': '2026-02-12 10:24:12.305936'}
+[2026-02-12T10:24:24.767572] AAPL - INITIALIZE: {'ticker': 'AAPL', 'timestamp': '2026-02-12 10:24:24.767555'}
+[2026-02-12T11:09:36.031930] AAPL - FETCH_ERROR: {'error': "'NoneType' object is not subscriptable"}
+[2026-02-12T15:29:58.440358] AAPL - INITIALIZE: {'ticker': 'AAPL', 'timestamp': '2026-02-12 15:29:58.440344'}

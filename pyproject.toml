@@ -8,6 +8,7 @@ dependencies = [
     "matplotlib>=3.10.8",
     "pandas>=2.3.3",
     "polars>=1.37.1",
+    "pyarrow>=23.0.0",
     "python-dotenv>=1.2.1",
     "seaborn>=0.13.2",
     "yfinance>=1.0",

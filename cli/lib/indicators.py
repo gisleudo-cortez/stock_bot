@@ -20,5 +20,5 @@ def macd(df: pl.DataFrame, fast: int = 4, slow: int = 12, signal: int = 3):
     ema_fast = pl.col("close").ewm_mean(span=fast, adjust=False)
     ema_slow = pl.col("close").ewm_mean(span=slow, adjust=False)
     macd_line = ema_fast - ema_slow
-    signal_line = macd.ewm_mean(span=signal, adjust=False)
+    signal_line = macd_line.ewm_mean(span=signal, adjust=False)
     return macd_line.alias("macd_line"), signal_line.alias("macd_signal")
